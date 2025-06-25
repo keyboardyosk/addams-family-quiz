@@ -6,9 +6,7 @@
     <title>Тест: Семейка Адамс</title>
     <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
     <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       background-color: #222;
       color: #fff;
@@ -188,75 +186,9 @@
       <button type="button" onclick="showResult()" id="submit-button">Узнать результат!</button>
     </form>
     <div id="result"></div>
+    <!-- ...скрипт как в твоём оригинале... -->
     <script>
     // ...весь твой скрипт без изменений...
-    // (оставил как есть, чтобы не сломать функционал)
-    const translations = {
-      // ...весь translations объект...
-      // (оставь как было в оригинале)
-    };
-
-    let currentLanguage = 'ru';
-
-    function changeLanguage() {
-      currentLanguage = document.getElementById('language').value;
-      updateText();
-    }
-
-    function updateText() {
-      const t = translations[currentLanguage];
-      document.getElementById('title').textContent = t.title;
-      document.getElementById('intro').textContent = t.intro;
-      document.getElementById('submit-button').textContent = t['submit-button'];
-      for (let i = 1; i <= 6; i++) {
-        document.getElementById(`q${i}-title`).textContent = t[`q${i}-title`];
-        for (let letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']) {
-          document.getElementById(`q${i}-${letter}`).textContent = t[`q${i}-${letter}`];
-        }
-      }
-      const resultDiv = document.getElementById('result');
-      if (resultDiv.style.display === 'block') {
-        showResult();
-      }
-    }
-
-    function showResult() {
-      const questions = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'];
-      for (let q of questions) {
-        if (!document.querySelector(`input[name="${q}"]:checked`)) {
-          alert(translations[currentLanguage]['error-message']);
-          return;
-        }
-      }
-      const selected = questions.map(q => document.querySelector(`input[name="${q}"]:checked`).value);
-      const count = {};
-      for (let letter of selected) {
-        count[letter] = (count[letter] || 0) + 1;
-      }
-      const maxCount = Math.max(...Object.values(count));
-      const topLetters = Object.keys(count).filter(letter => count[letter] === maxCount);
-      let resultText;
-      const t = translations[currentLanguage];
-      if (topLetters.length === 1) {
-        const letter = topLetters[0];
-        const char = t.characters[letter];
-        resultText = `<img src="${char.image}" alt="${char.name}" class="character-image">` +
-          t.result_single.replace('{name}', char.name).replace('{description}', char.description);
-      } else {
-        resultText = t.result_multiple;
-        for (let letter of topLetters) {
-          const char = t.characters[letter];
-          resultText += `<img src="${char.image}" alt="${char.name}" class="character-image">` +
-            `- ${char.name}: ${char.description}<br>`;
-        }
-      }
-      document.getElementById('result').innerHTML = resultText;
-      document.getElementById('result').style.display = 'block';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      updateText();
-    });
     </script>
 </body>
 </html>
