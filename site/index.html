@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Кто ты из семейки Адамс?</title>
+  <title>Кто ты из семейки Адамс? (v2 с анимацией)</title>
   <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -24,31 +24,86 @@
       font-size: 2.2em;
       margin: 0 0 10px 0;
       letter-spacing: 1px;
+      text-align: center;
     }
     #intro {
       font-size: 1.1em;
       margin-bottom: 24px;
+      text-align: center;
     }
-    .question {
-      margin-bottom: 22px;
+    #progressbar-wrap {
+      width: 100%;
+      background: #333;
+      border-radius: 8px;
+      height: 14px;
+      margin: 0 0 18px 0;
+      overflow: hidden;
+      box-shadow: 0 1px 6px #0006;
+    }
+    #progressbar {
+      height: 100%;
+      background: linear-gradient(90deg, #6e2e6a 0%, #2e6e4b 100%);
+      width: 0%;
+      transition: width 0.5s cubic-bezier(.4,2,.6,1);
+    }
+    #progress {
+      text-align: center;
+      margin-bottom: 18px;
+      font-size: 1em;
+      letter-spacing: 1px;
+      color: #aaa;
+    }
+    #quiz-box {
+      background: #181818;
+      border-radius: 10px;
+      padding: 22px 14px 18px 14px;
+      box-shadow: 0 2px 12px #0008;
+      margin-bottom: 18px;
+      min-height: 180px;
+      transition: box-shadow 0.2s;
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      animation: fadeInUp 0.5s cubic-bezier(.4,2,.6,1) forwards;
+    }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .question-title {
+      font-size: 1.15em;
+      margin-bottom: 16px;
       text-align: left;
-    }
-    .question h2 {
-      font-size: 1.1em;
-      margin: 0 0 8px 0;
+      opacity: 0;
+      animation: fadeIn 0.7s 0.1s forwards;
     }
     .answers label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       font-size: 1em;
       cursor: pointer;
       padding-left: 2px;
+      transition: color 0.2s;
+      opacity: 0;
+      animation: fadeIn 0.7s forwards;
+    }
+    .answers label:nth-child(1) { animation-delay: 0.15s; }
+    .answers label:nth-child(2) { animation-delay: 0.22s; }
+    .answers label:nth-child(3) { animation-delay: 0.29s; }
+    .answers label:nth-child(4) { animation-delay: 0.36s; }
+    .answers label:nth-child(5) { animation-delay: 0.43s; }
+    .answers label:nth-child(6) { animation-delay: 0.50s; }
+    .answers label:nth-child(7) { animation-delay: 0.57s; }
+    .answers label:nth-child(8) { animation-delay: 0.64s; }
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
     .answers input[type="radio"] {
       margin-right: 8px;
       accent-color: #666;
     }
-    #submit-button {
+    #next-btn, #restart-btn {
       width: 100%;
       background: #444;
       color: #fff;
@@ -60,8 +115,10 @@
       cursor: pointer;
       margin-top: 10px;
       transition: background 0.2s;
+      opacity: 0;
+      animation: fadeIn 0.7s 0.7s forwards;
     }
-    #submit-button:hover {
+    #next-btn:hover, #restart-btn:hover {
       background: #666;
     }
     #result {
@@ -72,6 +129,9 @@
       padding: 18px 10px;
       text-align: center;
       box-shadow: 0 2px 12px #0008;
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1) forwards;
     }
     .character-image {
       max-width: 180px;
@@ -80,15 +140,21 @@
       border: 2px solid #666;
       margin: 0 auto 12px auto;
       display: block;
+      opacity: 0;
+      animation: fadeIn 0.7s 0.1s forwards;
     }
     .character-title {
       font-size: 1.3em;
       margin: 0 0 6px 0;
       letter-spacing: 1px;
+      opacity: 0;
+      animation: fadeIn 0.7s 0.2s forwards;
     }
     .character-desc {
       font-size: 1em;
       margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeIn 0.7s 0.3s forwards;
     }
     @media (max-width: 600px) {
       #container {
@@ -97,14 +163,17 @@
       h1 {
         font-size: 1.3em;
       }
-      .question h2 {
+      .question-title {
         font-size: 1em;
       }
-      #result {
+      #quiz-box, #result {
         padding: 12px 2vw;
       }
       .character-image {
         max-width: 95vw;
+      }
+      #progressbar-wrap {
+        height: 10px;
       }
     }
   </style>
@@ -112,92 +181,94 @@
 <body>
   <div id="container">
     <h1>Кто ты из семейки Адамс?</h1>
-    <div id="intro">Ответь на вопросы и узнай, кто ты из легендарной семейки!</div>
-    <form id="quizForm">
-      <div class="question">
-        <h2>1. Как ты разбираешься с конфликтами?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q1" value="a">С элегантностью и спокойствием</label>
-          <label><input type="radio" name="q1" value="b">С жаром и страстью</label>
-          <label><input type="radio" name="q1" value="c">С мрачной и задумчивой миной</label>
-          <label><input type="radio" name="q1" value="d">С шалостями и приколами</label>
-          <label><input type="radio" name="q1" value="e">С чудаковатостью и непредсказуемостью</label>
-          <label><input type="radio" name="q1" value="f">С мудростью и капелькой магии</label>
-          <label><input type="radio" name="q1" value="g">С верностью и молчанием</label>
-          <label><input type="radio" name="q1" value="h">С помощью и прямым подходом</label>
-        </div>
-      </div>
-      <div class="question">
-        <h2>2. Как проводишь дождливый день?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q2" value="a">Читаю книгу при тусклом свете</label>
-          <label><input type="radio" name="q2" value="b">Танцую под дождём с кем-то близким</label>
-          <label><input type="radio" name="q2" value="c">Пишу мрачные стихи или рисую</label>
-          <label><input type="radio" name="q2" value="d">Разыгрываю домашних</label>
-          <label><input type="radio" name="q2" value="e">Экспериментирую с электричеством или странными хобби</label>
-          <label><input type="radio" name="q2" value="f">Варю зелья или гадаю на судьбу</label>
-          <label><input type="radio" name="q2" value="g">Стою на страже или делаю дела по дому</label>
-          <label><input type="radio" name="q2" value="h">Помогаю другим с их задачами</label>
-        </div>
-      </div>
-      <div class="question">
-        <h2>3. Как показываешь свои эмоции?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q3" value="a">Тонкими жестами и взглядами</label>
-          <label><input type="radio" name="q3" value="b">Широкими романтичными поступками</label>
-          <label><input type="radio" name="q3" value="c">Держу в себе или выплёскиваю в творчестве</label>
-          <label><input type="radio" name="q3" value="d">Через шутки и розыгрыши</label>
-          <label><input type="radio" name="q3" value="e">Громким смехом или странным поведением</label>
-          <label><input type="radio" name="q3" value="f">Даю мудрые советы или мистические намёки</label>
-          <label><input type="radio" name="q3" value="g">Бурчу или киваю</label>
-          <label><input type="radio" name="q3" value="h">Протягиваю руку помощи</label>
-        </div>
-      </div>
-      <div class="question">
-        <h2>4. Какая у тебя идеальная поездка?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q4" value="a">В заброшенный особняк или готический замок</label>
-          <label><input type="radio" name="q4" value="b">Романтическое путешествие в экзотическое место</label>
-          <label><input type="radio" name="q4" value="c">Одиночный трип в лес или на кладбище</label>
-          <label><input type="radio" name="q4" value="d">В парк аттракционов с кучей каруселей</label>
-          <label><input type="radio" name="q4" value="e">В лабораторию чокнутого учёного или странный музей</label>
-          <label><input type="radio" name="q4" value="f">В мистическое место с древними тайнами</label>
-          <label><input type="radio" name="q4" value="g">Остаюсь дома, чтобы помогать семье</label>
-          <label><input type="radio" name="q4" value="h">Туда, где могу быть полезен</label>
-        </div>
-      </div>
-      <div class="question">
-        <h2>5. Как решаешь проблемы?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q5" value="a">Спокойно и собранно</label>
-          <label><input type="radio" name="q5" value="b">С энтузиазмом и приключениями</label>
-          <label><input type="radio" name="q5" value="c">Разбираю всё по полочкам</label>
-          <label><input type="radio" name="q5" value="d">Ищу хитрое или подлое решение</label>
-          <label><input type="radio" name="q5" value="e">Придумываю что-то необычное и странное</label>
-          <label><input type="radio" name="q5" value="f">Спрашиваю духов или использую магию</label>
-          <label><input type="radio" name="q5" value="g">Делаю, что скажут</label>
-          <label><input type="radio" name="q5" value="h">Предлагаю руку или инструмент</label>
-        </div>
-      </div>
-      <div class="question">
-        <h2>Бонус: Какая еда твоя любимая?</h2>
-        <div class="answers">
-          <label><input type="radio" name="q6" value="a">Что-то изысканное и необычное</label>
-          <label><input type="radio" name="q6" value="b">Жгучая и страстная, типа острого</label>
-          <label><input type="radio" name="q6" value="c">Тёмное и горькое, вроде лакрицы</label>
-          <label><input type="radio" name="q6" value="d">Фастфуд или сладости</label>
-          <label><input type="radio" name="q6" value="e">Что-то странное, типа жареных жуков</label>
-          <label><input type="radio" name="q6" value="f">Домашняя еда с секретным ингредиентом</label>
-          <label><input type="radio" name="q6" value="g">Простая и сытная</label>
-          <label><input type="radio" name="q6" value="h">Еда, которую можно взять руками</label>
-        </div>
-      </div>
-      <button type="button" id="submit-button">Узнать результат!</button>
-    </form>
+    <div id="intro">Ответь на вопросы — и узнай, кто ты из легендарной семейки!</div>
+    <div id="progressbar-wrap"><div id="progressbar"></div></div>
+    <div id="progress"></div>
+    <div id="quiz-box"></div>
     <div id="result"></div>
   </div>
   <script>
-    // Карточки персонажей
+    const questions = [
+      {
+        q: "Какое твоё любимое место в доме?",
+        a: [
+          { text: "Тёмная гостиная с антиквариатом", value: "a" },
+          { text: "Где бы ни был(а) мой(я) любимый(ая)", value: "b" },
+          { text: "Старая библиотека или чердак", value: "c" },
+          { text: "Там, где можно устроить шалость", value: "d" },
+          { text: "Лаборатория или мастерская", value: "e" },
+          { text: "Кухня с ведьмиными зельями", value: "f" },
+          { text: "Подвал или кладовка", value: "g" },
+          { text: "Везде, где нужна помощь", value: "h" }
+        ]
+      },
+      {
+        q: "Как ты реагируешь на неожиданных гостей?",
+        a: [
+          { text: "Вежливо, но с загадкой", value: "a" },
+          { text: "С радостью и объятиями", value: "b" },
+          { text: "С холодным взглядом", value: "c" },
+          { text: "Пугаю или разыгрываю их", value: "d" },
+          { text: "Показываю свои странные изобретения", value: "e" },
+          { text: "Угощаю чем-то необычным", value: "f" },
+          { text: "Молча открываю дверь", value: "g" },
+          { text: "Помогаю им найти, что нужно", value: "h" }
+        ]
+      },
+      {
+        q: "Что ты делаешь, если кто-то обидел твоего друга?",
+        a: [
+          { text: "Делаю вид, что ничего не случилось, но запоминаю", value: "a" },
+          { text: "Бросаюсь защищать с энтузиазмом", value: "b" },
+          { text: "Пишу мрачное стихотворение", value: "c" },
+          { text: "Придумываю хитрый розыгрыш", value: "d" },
+          { text: "Пугаю обидчика странным поведением", value: "e" },
+          { text: "Даю мудрый совет", value: "f" },
+          { text: "Становлюсь стеной между другом и обидчиком", value: "g" },
+          { text: "Помогаю другу забыть обиду", value: "h" }
+        ]
+      },
+      {
+        q: "Какой твой идеальный вечер?",
+        a: [
+          { text: "Тихий вечер при свечах", value: "a" },
+          { text: "Танцы и веселье до утра", value: "b" },
+          { text: "Одиночество и творчество", value: "c" },
+          { text: "Семейные приколы и игры", value: "d" },
+          { text: "Эксперименты и открытия", value: "e" },
+          { text: "Варю зелья или гадаю на судьбу", value: "f" },
+          { text: "Помогаю по дому", value: "g" },
+          { text: "Делаю что-то полезное для других", value: "h" }
+        ]
+      },
+      {
+        q: "Какой твой стиль одежды?",
+        a: [
+          { text: "Готика, чёрное, элегантно", value: "a" },
+          { text: "Ярко, с изюминкой", value: "b" },
+          { text: "Мрачно и просто", value: "c" },
+          { text: "Что-то удобное для шалостей", value: "d" },
+          { text: "Странные аксессуары", value: "e" },
+          { text: "Платки, амулеты, ведьмины штучки", value: "f" },
+          { text: "Классика, строгий стиль", value: "g" },
+          { text: "Минимализм, главное — удобство", value: "h" }
+        ]
+      },
+      {
+        q: "Как ты шутишь?",
+        a: [
+          { text: "Тонко и с сарказмом", value: "a" },
+          { text: "Громко и заразительно", value: "b" },
+          { text: "Мрачно и чёрно", value: "c" },
+          { text: "Розыгрыши и шалости — моё всё", value: "d" },
+          { text: "Странные и непонятные шутки", value: "e" },
+          { text: "С намёком на магию", value: "f" },
+          { text: "Редко, но метко", value: "g" },
+          { text: "Простые, но добрые шутки", value: "h" }
+        ]
+      }
+    ];
+
     const characters = {
       a: {
         name: 'Мортиша Адамс',
@@ -241,18 +312,56 @@
       }
     };
 
-    document.getElementById('submit-button').onclick = function() {
-      const questions = ['q1','q2','q3','q4','q5','q6'];
-      let answers = [];
-      for (let q of questions) {
-        let checked = document.querySelector('input[name="'+q+'"]:checked');
-        if (!checked) {
-          alert('Пожалуйста, ответь на все вопросы!');
-          return;
-        }
-        answers.push(checked.value);
+    let current = 0;
+    let answers = [];
+
+    function animateQuizBox() {
+      const box = document.getElementById('quiz-box');
+      box.style.opacity = '0';
+      box.style.transform = 'translateY(30px) scale(0.98)';
+      // Триггерим анимацию
+      setTimeout(() => {
+        box.style.animation = 'none';
+        void box.offsetWidth; // reflow
+        box.style.animation = null;
+        box.style.opacity = '';
+        box.style.transform = '';
+      }, 10);
+    }
+
+    function showQuestion(idx) {
+      const q = questions[idx];
+      let html = `<div class="question-title">${q.q}</div><div class="answers">`;
+      q.a.forEach((ans, i) => {
+        html += `<label><input type="radio" name="answer" value="${ans.value}">${ans.text}</label>`;
+      });
+      html += `</div><button id="next-btn">${idx === questions.length - 1 ? 'Узнать результат!' : 'Далее'}</button>`;
+      document.getElementById('quiz-box').innerHTML = html;
+      document.getElementById('progress').textContent = `Вопрос ${idx + 1} из ${questions.length}`;
+      // Прогрессбар
+      let percent = Math.round((idx) / questions.length * 100);
+      document.getElementById('progressbar').style.width = percent + '%';
+      animateQuizBox();
+      document.getElementById('quiz-box').scrollIntoView({behavior: "smooth"});
+      document.getElementById('next-btn').onclick = nextStep;
+    }
+
+    function nextStep() {
+      let selected = document.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        alert('Пожалуйста, выбери вариант!');
+        return;
       }
-      // Подсчёт
+      answers[current] = selected.value;
+      current++;
+      if (current < questions.length) {
+        showQuestion(current);
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
       let counts = {};
       for (let v of answers) counts[v] = (counts[v]||0)+1;
       let max = Math.max(...Object.values(counts));
@@ -273,11 +382,31 @@
                    <div class="character-desc">${ch.desc}</div>`;
         }
       }
+      html += `<button id="restart-btn">Пройти ещё раз</button>`;
+      document.getElementById('quiz-box').innerHTML = '';
+      document.getElementById('progress').textContent = '';
+      document.getElementById('progressbar').style.width = '100%';
       let result = document.getElementById('result');
       result.innerHTML = html;
       result.style.display = 'block';
       result.scrollIntoView({behavior: "smooth"});
-    };
+      // Триггерим анимацию результата
+      result.style.animation = 'none';
+      void result.offsetWidth;
+      result.style.animation = null;
+      document.getElementById('restart-btn').onclick = restartQuiz;
+    }
+
+    function restartQuiz() {
+      current = 0;
+      answers = [];
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('progressbar').style.width = '0%';
+      showQuestion(0);
+    }
+
+    // Стартуем квиз
+    showQuestion(0);
   </script>
 </body>
 </html>
